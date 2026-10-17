@@ -42,7 +42,12 @@ export function Footer() {
                 <li key={item.href}>
                   <button
                     onClick={() => {
-                      document.getElementById(item.sectionId)?.scrollIntoView({ behavior: "smooth" });
+                      const el = document.getElementById(item.sectionId);
+                      if (el) {
+                        const navOffset = 88;
+                        const top = el.getBoundingClientRect().top + window.pageYOffset - navOffset;
+                        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+                      }
                     }}
                     className="text-xs font-mono text-slate-400 hover:text-[var(--accent-blue-bright)] transition-colors cursor-pointer"
                   >

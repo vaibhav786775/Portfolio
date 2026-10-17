@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 import { navItems, socialLinks } from "@/data/navigation";
@@ -19,13 +19,9 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 30);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  // Track if a click triggered the scroll to prevent scroll-spy jitter
+  const isManualScroll = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Close mobile nav on Escape
   useEffect(() => {
@@ -36,35 +32,78 @@ export function Navbar() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Intersection observer for active section detection
+  // Robust, high-precision scroll-spy
   useEffect(() => {
-    const sections = ["hero", ...navItems.map((item) => item.sectionId)];
-    const observers = sections.map((id) => {
-      const el = document.getElementById(id);
-      if (!el) return null;
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setActiveSection(id);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 25);
+
+      // Skip scroll-spy calculation if user just clicked a nav button
+      if (isManualScroll.current) return;
+
+      // 1. If at the bottom of the page, activate "contact"
+      const scrollBottom = window.innerHeight + window.scrollY;
+      const docHeight = document.documentElement.scrollHeight;
+      if (docHeight - scrollBottom < 100) {
+        setActiveSection("contact");
+        return;
+      }
+
+      // 2. If at top of the page, activate "hero"
+      if (window.scrollY < 220) {
+        setActiveSection("hero");
+        return;
+      }
+
+      // 3. Check section positions in reverse order
+      const sectionIds = navItems.map((item) => item.sectionId);
+      const navOffset = 130; // activation line below navbar
+
+      for (let i = sectionIds.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sectionIds[i]);
+        if (el) {
+          const top = el.offsetTop - navOffset;
+          if (window.scrollY >= top) {
+            setActiveSection(sectionIds[i]);
+            return;
           }
-        },
-        { threshold: 0.25, rootMargin: "-12% 0px -40% 0px" }
-      );
-      observer.observe(el);
-      return observer;
-    });
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // run once on initial render
 
     return () => {
-      observers.forEach((obs) => obs?.disconnect());
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     };
   }, []);
 
   const handleNavClick = (href: string) => {
     setMobileOpen(false);
     const id = href.replace("#", "");
+
+    // Immediately highlight the clicked section
+    setActiveSection(id);
+
+    // Lock scroll-spy while smooth scrolling to prevent intermediate flickering
+    isManualScroll.current = true;
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      isManualScroll.current = false;
+    }, 850);
+
     const target = document.getElementById(id);
     if (target) {
-      target.scrollIntoView({ behavior: "smooth" });
+      // 88px navbar clearance
+      const navClearance = 88;
+      const elementTop = target.getBoundingClientRect().top;
+      const targetScrollY = elementTop + window.pageYOffset - navClearance;
+
+      window.scrollTo({
+        top: Math.max(0, targetScrollY),
+        behavior: "smooth",
+      });
     }
   };
 
@@ -75,8 +114,8 @@ export function Navbar() {
         <nav
           className={`w-full flex items-center justify-between px-4 sm:px-5 py-2.5 rounded-full transition-all duration-300 border ${
             scrolled
-              ? "bg-[rgba(8,12,22,0.92)] border-[rgba(59,130,246,0.3)] shadow-[0_8px_32px_rgba(0,0,0,0.65),0_0_24px_rgba(59,130,246,0.16)] backdrop-blur-xl"
-              : "bg-[rgba(11,15,26,0.72)] border-[rgba(255,255,255,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.45)] backdrop-blur-md"
+              ? "bg-[rgba(8,12,22,0.94)] border-[rgba(59,130,246,0.35)] shadow-[0_8px_32px_rgba(0,0,0,0.7),0_0_24px_rgba(59,130,246,0.2)] backdrop-blur-xl"
+              : "bg-[rgba(11,15,26,0.8)] border-[rgba(255,255,255,0.1)] shadow-[0_4px_24px_rgba(0,0,0,0.45)] backdrop-blur-md"
           }`}
           aria-label="Main navigation"
         >
@@ -85,6 +124,7 @@ export function Navbar() {
             href="#hero"
             onClick={(e) => {
               e.preventDefault();
+              setActiveSection("hero");
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
             className="flex items-center gap-2 group cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent-blue)] rounded-full px-1"
@@ -99,7 +139,7 @@ export function Navbar() {
             </span>
           </motion.a>
 
-          {/* Desktop Nav Items with Animated Pill Indicator */}
+          {/* Desktop Nav Items with High-Contrast Active Pill */}
           <ul className="hidden md:flex items-center gap-1 relative" role="list">
             {navItems.map((item) => {
               const isActive = activeSection === item.sectionId;
@@ -107,21 +147,26 @@ export function Navbar() {
                 <li key={item.href} className="relative">
                   <motion.button
                     onClick={() => handleNavClick(item.href)}
-                    className={`relative z-10 px-3.5 py-1.5 text-xs font-mono font-medium rounded-full transition-colors cursor-pointer ${
-                      isActive ? "text-white" : "text-slate-400 hover:text-white"
+                    className={`relative z-10 px-3.5 py-1.5 text-xs font-mono font-medium rounded-full transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                      isActive
+                        ? "text-white font-semibold drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]"
+                        : "text-slate-400 hover:text-white hover:bg-[rgba(255,255,255,0.03)]"
                     }`}
                     aria-current={isActive ? "page" : undefined}
-                    whileTap={{ scale: 0.96 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    {item.label}
+                    {isActive && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-cyan)] shadow-[0_0_8px_var(--accent-cyan)]" />
+                    )}
+                    <span>{item.label}</span>
                   </motion.button>
 
-                  {/* Animated sliding active indicator pill */}
+                  {/* Animated sliding active indicator pill with neon glow */}
                   {isActive && (
                     <motion.div
                       layoutId="active-nav-pill"
-                      className="absolute inset-0 z-0 rounded-full bg-[rgba(59,130,246,0.2)] border border-[rgba(96,165,250,0.4)] shadow-[0_0_14px_rgba(59,130,246,0.28)]"
-                      transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                      className="absolute inset-0 z-0 rounded-full bg-gradient-to-r from-blue-600/35 via-indigo-600/35 to-violet-600/35 border border-blue-400/60 shadow-[0_0_16px_rgba(59,130,246,0.35),inset_0_0_8px_rgba(59,130,246,0.2)]"
+                      transition={{ type: "spring", stiffness: 420, damping: 30 }}
                     />
                   )}
                 </li>
@@ -153,7 +198,7 @@ export function Navbar() {
 
             <motion.button
               onClick={() => handleNavClick(siteSettings.navigationSettings.ctaTarget)}
-              className="px-3.5 py-1.5 rounded-full text-xs font-mono font-medium text-[var(--accent-blue-bright)] bg-[rgba(59,130,246,0.1)] border border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.22)] hover:border-[rgba(59,130,246,0.5)] transition-all cursor-pointer flex items-center gap-1 shadow-[0_0_12px_rgba(59,130,246,0.15)]"
+              className="px-3.5 py-1.5 rounded-full text-xs font-mono font-medium text-[var(--accent-blue-bright)] bg-[rgba(59,130,246,0.12)] border border-[rgba(59,130,246,0.35)] hover:bg-[rgba(59,130,246,0.22)] hover:border-[rgba(59,130,246,0.55)] transition-all cursor-pointer flex items-center gap-1 shadow-[0_0_12px_rgba(59,130,246,0.18)]"
               whileHover={buttonTapMotion.hover}
               whileTap={buttonTapMotion.tap}
             >
@@ -185,23 +230,30 @@ export function Navbar() {
             transition={spaceTransitions.gentleSpring}
             className="md:hidden mt-2 max-w-5xl mx-auto pointer-events-auto"
           >
-            <div className="bg-[rgba(8,12,22,0.95)] border border-[rgba(59,130,246,0.3)] shadow-[0_12px_48px_rgba(0,0,0,0.8),0_0_24px_rgba(59,130,246,0.2)] backdrop-blur-2xl rounded-3xl p-5 flex flex-col gap-3">
-              <ul className="flex flex-col gap-1">
+            <div className="bg-[rgba(8,12,22,0.96)] border border-[rgba(59,130,246,0.35)] shadow-[0_12px_48px_rgba(0,0,0,0.85),0_0_24px_rgba(59,130,246,0.25)] backdrop-blur-2xl rounded-3xl p-5 flex flex-col gap-3">
+              <ul className="flex flex-col gap-1.5">
                 {navItems.map((item) => {
                   const isActive = activeSection === item.sectionId;
                   return (
                     <li key={item.href}>
                       <button
                         onClick={() => handleNavClick(item.href)}
-                        className={`w-full text-left px-4 py-2.5 rounded-xl font-mono text-sm transition-all flex items-center justify-between cursor-pointer ${
+                        className={`w-full text-left px-4 py-3 rounded-xl font-mono text-sm transition-all flex items-center justify-between cursor-pointer ${
                           isActive
-                            ? "bg-[rgba(59,130,246,0.15)] text-[var(--accent-blue-bright)] border border-[rgba(59,130,246,0.3)] font-semibold"
-                            : "text-slate-300 hover:text-white hover:bg-[rgba(255,255,255,0.04)]"
+                            ? "bg-gradient-to-r from-blue-600/30 to-violet-600/30 text-white border border-blue-400/50 font-semibold shadow-[0_0_16px_rgba(59,130,246,0.25)]"
+                            : "text-slate-300 hover:text-white hover:bg-[rgba(255,255,255,0.05)]"
                         }`}
                       >
-                        <span>{item.label}</span>
+                        <div className="flex items-center gap-2.5">
+                          {isActive && (
+                            <span className="w-2 h-2 rounded-full bg-[var(--accent-cyan)] shadow-[0_0_8px_var(--accent-cyan)]" />
+                          )}
+                          <span>{item.label}</span>
+                        </div>
                         {isActive && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-cyan)] shadow-[0_0_6px_var(--accent-cyan)]" />
+                          <span className="text-[10px] uppercase tracking-wider text-cyan-400 font-mono font-medium">
+                            Active
+                          </span>
                         )}
                       </button>
                     </li>
@@ -209,7 +261,7 @@ export function Navbar() {
                 })}
               </ul>
 
-              <div className="pt-3 border-t border-[rgba(255,255,255,0.06)] flex items-center justify-between">
+              <div className="pt-3 border-t border-[rgba(255,255,255,0.08)] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {socialLinks.map((link) => {
                     const Icon = iconMap[link.icon];
@@ -217,10 +269,10 @@ export function Navbar() {
                       <a
                         key={link.label}
                         href={link.href}
-                        target="_blank"
+                        target={link.href.startsWith("mailto") ? undefined : "_blank"}
                         rel="noopener noreferrer"
                         aria-label={link.ariaLabel}
-                        className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[rgba(255,255,255,0.05)] transition-colors cursor-pointer"
+                        className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[rgba(255,255,255,0.06)] transition-colors cursor-pointer"
                       >
                         {Icon && <Icon size={16} />}
                       </a>
@@ -230,7 +282,7 @@ export function Navbar() {
 
                 <button
                   onClick={() => handleNavClick(siteSettings.navigationSettings.ctaTarget)}
-                  className="px-4 py-2 rounded-full text-xs font-mono font-medium text-[var(--accent-blue-bright)] bg-[rgba(59,130,246,0.15)] border border-[rgba(59,130,246,0.3)] cursor-pointer flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-full text-xs font-mono font-medium text-[var(--accent-blue-bright)] bg-[rgba(59,130,246,0.15)] border border-[rgba(59,130,246,0.35)] cursor-pointer flex items-center gap-1.5"
                 >
                   <span>{siteSettings.navigationSettings.ctaButtonText}</span>
                   <ArrowUpRight size={13} />
