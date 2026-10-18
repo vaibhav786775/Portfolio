@@ -35,7 +35,7 @@ export const projects: Project[] = [
       "yt-dlp",
       "FFmpeg",
     ],
-    image: null,
+    image: "/images/videomind.png",
     githubUrl: "https://github.com/vaibhav786775/AI-video-assistant",
     liveUrl: null,
     featured: true,
