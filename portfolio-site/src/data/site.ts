@@ -47,11 +47,11 @@ export const siteSettings: SiteSettings = {
     },
   },
 
-  profileImage: "/images/profile.jpg",
-  resumeFilePath: "/resume.pdf", // Uploaded to /public/resume.pdf
-  email: "vaibhav.chhabra@example.com", // Configurable email
-  githubUrl: "https://github.com/vaibhav-chhabra", // Configurable GitHub
-  linkedinUrl: "https://linkedin.com/in/vaibhav-chhabra", // Configurable LinkedIn
+  profileImage: "/images/image.png",
+  resumeFilePath: "/main_resume.pdf", // Uploaded to /public/resume.pdf
+  email: "vaibhav13754@gmail.com", // Configurable email
+  githubUrl: "https://github.com/vaibhav786775", // Configurable GitHub
+  linkedinUrl: "https://linkedin.com/in/vaibhavchhabra786/", // Configurable LinkedIn
   twitterHandle: "@vaibhav_chhabra",
   url: "https://vaibhavchhabra.dev",
   ogImage: "/og-image.png",
