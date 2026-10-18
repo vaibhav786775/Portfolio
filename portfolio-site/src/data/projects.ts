@@ -14,6 +14,7 @@ import type { Project } from "@/types/portfolio";
  *   a space architecture schematic blueprint. If `githubUrl` or `liveUrl` is null,
  *   the button hides gracefully.
  */
+
 export const projects: Project[] = [
   {
     id: "videomind-ai",
@@ -34,9 +35,9 @@ export const projects: Project[] = [
       "yt-dlp",
       "FFmpeg",
     ],
-    image: null, // Gracefully renders procedural space blueprint fallback
-    githubUrl: "https://github.com/vaibhav-chhabra/videomind-ai", // Configurable placeholder
-    liveUrl: null, // Not deployed publicly
+    image: null,
+    githubUrl: "https://github.com/vaibhav786775/AI-video-assistant",
+    liveUrl: null,
     featured: true,
     status: "Completed",
     highlights: [
@@ -64,7 +65,7 @@ export const projects: Project[] = [
       "Multer",
     ],
     image: null,
-    githubUrl: "https://github.com/vaibhav-chhabra/applysmart",
+    githubUrl: "https://github.com/vaibhav786775/ApplySmart",
     liveUrl: null,
     featured: true,
     status: "Completed",
@@ -72,26 +73,6 @@ export const projects: Project[] = [
       "Implemented recruiter and candidate workflows.",
       "Built resume analysis with missing-keyword identification and ATS-focused suggestions.",
       "Implemented authentication, REST APIs, and cloud-based uploads.",
-    ],
-  },
-  {
-    id: "certificate-authenticity-validator",
-    title: "Academic Certificate Authenticity Validator",
-    shortDescription:
-      "A certificate verification application developed as part of my Smart India Hackathon 2025 participation.",
-    fullDescription:
-      "Built as a Smart India Hackathon 2025 National Finalist solution to prevent academic credential forgery. Provides a multi-tiered verification pipeline enabling institutions and employers to validate academic credentials, issue tamper-evident digital records, and query validation statuses in real-time through secure RESTful endpoints. Implemented with React.js, Node.js, Express.js, and MongoDB.",
-    category: "SIH / Full-Stack Development",
-    technologies: ["React.js", "Node.js", "Express.js", "MongoDB", "REST APIs"],
-    image: null,
-    githubUrl: "https://github.com/vaibhav-chhabra/academic-certificate-validator",
-    liveUrl: null,
-    featured: true,
-    status: "Completed",
-    highlights: [
-      "Developed the frontend and backend.",
-      "Implemented REST APIs and certificate verification.",
-      "Participated as part of an SIH 2025 National Finalist team.",
     ],
   },
 ];
