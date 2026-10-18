@@ -1,0 +1,14 @@
+{
+  "name": "portfolio-workspace",
+  "private": true,
+  "workspaces": [
+    "portfolio-site"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=portfolio-site",
+    "build": "npm run build --workspace=portfolio-site",
+    "start": "npm run start --workspace=portfolio-site",
+    "lint": "npm run lint --workspace=portfolio-site",
+    "type-check": "npm run type-check --workspace=portfolio-site"
+  }
+}
