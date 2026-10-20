@@ -17,6 +17,41 @@ import type { Project } from "@/types/portfolio";
 
 export const projects: Project[] = [
   {
+id: "fresherai",
+title: "FresherAI",
+shortDescription:
+"A multi-agent AI interview and career acceleration platform featuring mock interviews, ATS resume analysis, personalized learning roadmaps, and performance analytics.",
+fullDescription:
+"Built a microservices-based AI career preparation platform using Node.js, Express.js, React, and MongoDB. Implemented LangGraph-powered multi-agent workflows for adaptive technical and HR interviews, structured feedback across 8 evaluation criteria, ATS resume scoring, and personalized career roadmaps. Integrated Redis for session management and caching, Firebase Authentication, voice-enabled interview simulations with Monaco code editor, and Razorpay payments with HMAC-SHA256 signature verification.",
+category: "AI / Multi-Agent Systems / Microservices",
+technologies: [
+"React 19",
+"Node.js",
+"Express.js",
+"Microservices",
+"LangGraph",
+"LangChain",
+"Groq AI",
+"MongoDB",
+"Redis",
+"Firebase",
+"Docker",
+"Razorpay",
+"Monaco Editor",
+],
+image: "/images/imterview_agent",
+githubUrl: "https://github.com/vaibhav786775/project_Interview_agent",
+liveUrl: null,
+featured: true,
+status: "Completed",
+highlights: [
+"Designed a microservices architecture with an API Gateway and 5 independent services for authentication, interviews, resume analysis, roadmaps, and billing.",
+"Built LangGraph-powered AI workflows for adaptive mock interviews, 8-criteria answer evaluation, ATS resume scoring, and personalized career roadmaps.",
+"Implemented Redis-backed session management, caching, and HTTP-only cookie authentication.",
+"Integrated voice-based interviews, webcam support, Monaco code editor, performance analytics, and Razorpay payment verification.",
+],
+},
+  {
     id: "videomind-ai",
     title: "VideoMind AI",
     shortDescription:
