@@ -39,7 +39,7 @@ technologies: [
 "Razorpay",
 "Monaco Editor",
 ],
-image: "/images/imterview_agent",
+image: "/images/imterview_agent.png",
 githubUrl: "https://github.com/vaibhav786775/project_Interview_agent",
 liveUrl: null,
 featured: true,
