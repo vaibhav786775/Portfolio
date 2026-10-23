@@ -48,7 +48,7 @@ export const siteSettings: SiteSettings = {
   },
 
   profileImage: "/images/image.png",
-  resumeFilePath: "/main_resume.pdf", // Uploaded to /public/resume.pdf
+  resumeFilePath: "/final_resume.pdf", // Uploaded to /public/resume.pdf
   email: "vaibhav13754@gmail.com", // Configurable email
   githubUrl: "https://github.com/vaibhav786775", // Configurable GitHub
   linkedinUrl: "https://linkedin.com/in/vaibhavchhabra786/", // Configurable LinkedIn
